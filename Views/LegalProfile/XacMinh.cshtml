@@ -1,0 +1,32 @@
+@{
+    ViewData["Title"] = "Xác minh hồ sơ pháp lý";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">@ViewData["Title"]</h2>
+                    <form asp-action="XacMinh" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label">Chọn file cần xác minh (PDF, Word...)</label>
+                            <input type="file" name="file" class="form-control" accept=".pdf,.doc,.docx" required />
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Xác minh
+                            </button>
+                        </div>
+                    </form>
+                    @if (ViewBag.Result != null)
+                    {
+                        <div class="alert mt-4 @(ViewBag.Result.ToString().Contains("thành công") ? "alert-success" : "alert-danger")">
+                            @ViewBag.Result
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

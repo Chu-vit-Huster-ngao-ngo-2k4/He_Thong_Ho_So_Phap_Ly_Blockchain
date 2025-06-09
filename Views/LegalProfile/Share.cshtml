@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "Phân quyền hồ sơ";
+    var users = ViewBag.Users as List<prj1.Models.User>;
+    var legalProfile = ViewBag.LegalProfile as prj1.Models.LegalProfile;
+}
+<div class="container mt-4">
+    <h2>@ViewData["Title"]</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4>Hồ sơ: @legalProfile?.Name</h4>
+            <form asp-action="Share" method="post">
+                <input type="hidden" name="id" value="@legalProfile?.Id" />
+                <div class="mb-3">
+                    <label for="userId" class="form-label">Chọn người dùng</label>
+                    <select class="form-select" name="userId" id="userId" required>
+                        <option value="">-- Chọn người dùng --</option>
+                        @foreach (var user in users)
+                        {
+                            <option value="@user.Id">@user.FullName (@user.Email)</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="permissionType" class="form-label">Chọn quyền</label>
+                    <select class="form-select" name="permissionType" id="permissionType" required>
+                        <option value="View">Chỉ xem</option>
+                        <option value="Edit">Chỉnh sửa</option>
+                        <option value="DownloadOnly">Chỉ tải về</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-share-alt"></i> Cấp quyền
+                </button>
+                <a asp-action="Details" asp-route-id="@legalProfile?.Id" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+} 

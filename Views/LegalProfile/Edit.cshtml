@@ -1,0 +1,160 @@
+@model prj1.Models.LegalProfile
+
+@{
+    ViewData["Title"] = "Chỉnh sửa hồ sơ pháp lý";
+    var auditLogs = (List<prj1.Models.AuditLog>)ViewBag.AuditLogs;
+}
+
+<div class="container">
+    <h2>@ViewData["Title"]</h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="Edit" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Thêm file đính kèm</label>
+                            <input type="file" name="files" multiple class="form-control" 
+                                   accept=".pdf,.doc,.docx" />
+                            <div class="form-text">
+                                Hỗ trợ định dạng: PDF, Word (.doc, .docx)
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label"></label>
+                            <select asp-for="Status" class="form-select"
+                                    asp-items="Html.GetEnumSelectList<prj1.Models.LegalProfileStatus>()">
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Lưu thay đổi
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            @if (Model.Files.Any())
+            {
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">File đính kèm</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên file</th>
+                                        <th>Loại file</th>
+                                        <th>Kích thước</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var file in Model.Files)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a href="@file.FilePath" target="_blank">
+                                                    @file.FileName
+                                                </a>
+                                            </td>
+                                            <td>@file.ContentType</td>
+                                            <td>@(file.FileSize / 1024) KB</td>
+                                            <td>
+                                                <form asp-action="DeleteFile" method="post" class="d-inline">
+                                                    <input type="hidden" name="id" value="@file.Id" />
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-danger"
+                                                            onclick="return confirm('Bạn có chắc chắn muốn xóa file này?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (auditLogs != null && auditLogs.Any())
+    {
+        <div class="row mt-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Lịch sử chỉnh sửa hồ sơ</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            @foreach (var log in auditLogs.OrderByDescending(x => x.Timestamp))
+                            {
+                                <div class="timeline-item">
+                                    <div class="timeline-date">@log.Timestamp.ToString("dd/MM/yyyy HH:mm")</div>
+                                    <div class="timeline-content">
+                                        <h4>@log.Action</h4>
+                                        <p>@log.UserName</p>
+                                        <p>@log.ChangedFields</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+.timeline {
+    border-left: 2px solid #1976d2;
+    margin-left: 1rem;
+    padding-left: 1.5rem;
+}
+.timeline li::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: #1976d2;
+    border-radius: 50%;
+    margin-right: 10px;
+    position: relative;
+    left: -22px;
+    top: 2px;
+}
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

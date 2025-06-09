@@ -1,0 +1,183 @@
+﻿@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="container-fluid p-0">
+    <!-- Hero Section -->
+    <div class="bg-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="display-4 fw-bold mb-4">Hệ thống Hồ sơ Pháp lý Số hóa</h1>
+                    <p class="lead mb-4">
+                        Quản lý hồ sơ pháp lý một cách an toàn, hiệu quả và tiết kiệm thời gian.
+                        Tất cả tài liệu của bạn được lưu trữ và quản lý tập trung trên nền tảng số.
+                    </p>
+                    @if (!User.Identity.IsAuthenticated)
+                    {
+                        <div class="d-grid gap-2 d-md-flex">
+                            <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg px-4 me-md-2">
+                                <i class="fas fa-user-plus"></i> Đăng ký ngay
+                            </a>
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg px-4">
+                                <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-grid gap-2 d-md-flex">
+                            <a asp-controller="LegalProfile" asp-action="Index" class="btn btn-light btn-lg px-4">
+                                <i class="fas fa-folder"></i> Quản lý hồ sơ
+                            </a>
+                        </div>
+                    }
+                </div>
+                <div class="col-md-6 d-none d-md-block">
+                    <img src="~/images/hero-image.svg" alt="Legal Documents" class="img-fluid" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="container py-5">
+        <h2 class="text-center mb-5">Tính năng nổi bật</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                            <i class="fas fa-cloud-upload-alt fa-2x"></i>
+                        </div>
+                        <h3 class="card-title h5">Lưu trữ số hóa</h3>
+                        <p class="card-text">
+                            Upload và lưu trữ tài liệu pháp lý dưới dạng số hóa, 
+                            hỗ trợ nhiều định dạng file phổ biến.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                            <i class="fas fa-shield-alt fa-2x"></i>
+                        </div>
+                        <h3 class="card-title h5">Bảo mật cao</h3>
+                        <p class="card-text">
+                            Hệ thống bảo mật đa lớp, mã hóa dữ liệu, 
+                            đảm bảo an toàn cho tài liệu pháp lý của bạn.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                            <i class="fas fa-tasks fa-2x"></i>
+                        </div>
+                        <h3 class="card-title h5">Quản lý hiệu quả</h3>
+                        <p class="card-text">
+                            Theo dõi trạng thái, tìm kiếm nhanh chóng, 
+                            quản lý hồ sơ một cách có hệ thống.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="bg-light py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Quy trình làm việc</h2>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="step-number bg-primary text-white rounded-circle mb-3">1</div>
+                        <h4>Đăng ký tài khoản</h4>
+                        <p>Tạo tài khoản để bắt đầu sử dụng hệ thống</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="step-number bg-primary text-white rounded-circle mb-3">2</div>
+                        <h4>Tạo hồ sơ</h4>
+                        <p>Thêm thông tin và tài liệu cho hồ sơ pháp lý</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="step-number bg-primary text-white rounded-circle mb-3">3</div>
+                        <h4>Quản lý trạng thái</h4>
+                        <p>Theo dõi và cập nhật trạng thái hồ sơ</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="step-number bg-primary text-white rounded-circle mb-3">4</div>
+                        <h4>Truy xuất thông tin</h4>
+                        <p>Tìm kiếm và xem thông tin hồ sơ khi cần</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h2 class="mb-4">Bắt đầu quản lý hồ sơ pháp lý của bạn ngay hôm nay</h2>
+                <p class="lead mb-4">
+                    Tham gia cùng hàng nghìn người dùng đang sử dụng hệ thống của chúng tôi
+                    để quản lý hồ sơ pháp lý một cách hiệu quả.
+                </p>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg px-5">
+                        <i class="fas fa-user-plus"></i> Đăng ký miễn phí
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="LegalProfile" asp-action="Index" class="btn btn-primary btn-lg px-5">
+                        <i class="fas fa-folder"></i> Truy cập hồ sơ
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin: 0 auto;
+    }
+
+    .card {
+        transition: transform 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>

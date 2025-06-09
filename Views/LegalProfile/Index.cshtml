@@ -1,0 +1,130 @@
+@model IEnumerable<prj1.Models.LegalProfile>
+
+@{
+    ViewData["Title"] = "Danh sách hồ sơ pháp lý";
+    var currentUser = ViewBag.CurrentUser as prj1.Models.User;
+}
+
+<div class="container">
+    <h2>@ViewData["Title"]</h2>
+
+    <div class="mb-3">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Tạo hồ sơ mới
+        </a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Lọc theo trạng thái</label>
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="">Tất cả</option>
+                        @foreach (var status in Enum.GetValues(typeof(prj1.Models.LegalProfileStatus)))
+                        {
+                            var displayAttr = status.GetType()
+                                .GetField(status.ToString())
+                                .GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
+                                .FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
+
+                            var displayName = displayAttr?.Name ?? status.ToString();
+                            var selected = ViewBag.Status?.ToString() == status.ToString();
+                            <option value="@status" selected="@selected">@displayName</option>
+                        }
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Name)</th>
+                    <th>@Html.DisplayNameFor(model => model.Description)</th>
+                    <th>@Html.DisplayNameFor(model => model.CreatedAt)</th>
+                    <th>@Html.DisplayNameFor(model => model.Status)</th>
+                    <th>Số file đính kèm</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.Id">@item.Name</a>
+                        </td>
+                        <td>@item.Description</td>
+                        <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            @{
+                                var statusDisplayAttr = item.Status.GetType()
+                                    .GetField(item.Status.ToString())
+                                    .GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
+                                    .FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
+                                var statusDisplayName = statusDisplayAttr?.Name ?? item.Status.ToString();
+                            }
+                            @statusDisplayName
+                        </td>
+                        <td>@item.Files.Count</td>
+                        <td>
+                            <div class="btn-group">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i> Sửa
+                                </a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+                                    <i class="fas fa-info-circle"></i> Chi tiết
+                                </a>
+                                @if (item.UserId == currentUser.Id || currentUser.Role == "Admin")
+                                {
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            onclick="confirmDelete(@item.Id, '@item.Name')">
+                                        <i class="fas fa-trash"></i> Xóa
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal xác nhận xóa -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa hồ sơ "<span id="deleteProfileName"></span>"?</p>
+                <p class="text-danger">Lưu ý: Hành động này không thể hoàn tác.</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" asp-action="Delete" method="post">
+                    <input type="hidden" id="deleteProfileId" name="id" />
+                    @Html.AntiForgeryToken()
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, name) {
+            document.getElementById('deleteProfileId').value = id;
+            document.getElementById('deleteProfileName').textContent = name;
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+} 

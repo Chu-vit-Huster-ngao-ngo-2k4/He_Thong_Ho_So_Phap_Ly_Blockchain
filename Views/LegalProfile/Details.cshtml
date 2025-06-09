@@ -1,0 +1,167 @@
+@model prj1.Models.LegalProfile
+@using prj1.Models
+@{
+    ViewData["Title"] = "Chi tiết hồ sơ pháp lý";
+    var currentUser = ViewBag.CurrentUser as prj1.Models.User;
+}
+<div class="container mt-4">
+    <h2>@ViewData["Title"]</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4>@Model.Name</h4>
+            <p><strong>Mô tả:</strong> @Model.Description</p>
+            <p><strong>Trạng thái:</strong> @Model.Status.ToString()</p>
+            <p><strong>Người tạo:</strong> @Model.User?.FullName (@Model.User?.Email)</p>
+            <p><strong>Thời gian tạo:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+            <div>
+                <strong>File đính kèm:</strong>
+                @if (Model.Files != null && Model.Files.Any())
+                {
+                    <ul>
+                        @foreach (var file in Model.Files)
+                        {
+                            <li>
+                                <a href="@Url.Content(file.FilePath)" target="_blank">@file.FileName</a>
+                                <span class="text-muted">(@file.ContentType, @file.FileSize bytes)</span>
+                                <button type="button" class="btn btn-link btn-sm" onclick="copyToClipboard('@Html.Raw(file.FilePath.Replace("\\", "\\\\").Replace("'", "\\'") )')">
+                                    Copy đường dẫn local
+                                </button>
+                                <span class="text-muted small">@file.FilePath</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <span class="text-danger">Không có file đính kèm</span>
+                }
+            </div>
+            <div class="mt-3">
+                @if (currentUser != null && (currentUser.Id == Model.UserId || currentUser.Role == "Admin"))
+                {
+                    <a class="btn btn-warning" asp-action="Edit" asp-route-id="@Model.Id">
+                        <i class="fas fa-edit"></i> Chỉnh sửa
+                    </a>
+                    <a class="btn btn-info" asp-action="Share" asp-route-id="@Model.Id">
+                        <i class="fas fa-user-shield"></i> Phân quyền
+                    </a>
+                }
+                <a class="btn btn-secondary" asp-action="Index">
+                    <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>Lịch sử chỉnh sửa (Audit Log)</strong>
+        </div>
+        <div class="card-body">
+            @if (Model.AuditLogs != null && Model.AuditLogs.Any())
+            {
+                <ul class="timeline">
+                    @foreach (var log in Model.AuditLogs.OrderByDescending(l => l.Timestamp))
+                    {
+                        <li>
+                            <span class="fw-bold">@log.Timestamp.ToString("dd/MM/yyyy HH:mm")</span> -
+                            <span>@log.UserName</span>:
+                            <span class="text-primary">@log.Action</span>
+                            @if (!string.IsNullOrEmpty(log.ChangedFields))
+                            {
+                                var changedFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(log.ChangedFields);
+                                <ul class="small text-muted mb-1">
+                                    @foreach (var field in changedFields)
+                                    {
+                                        <li><strong>@field.Key</strong>: @field.Value</li>
+                                    }
+                                </ul>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <span class="text-muted">Chưa có lịch sử chỉnh sửa</span>
+            }
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>Danh sách người dùng được phân quyền</strong>
+        </div>
+        <div class="card-body">
+            @if (Model.Permissions != null && Model.Permissions.Any())
+            {
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Họ tên</th>
+                            <th>Email</th>
+                            <th>Quyền</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var perm in Model.Permissions)
+                        {
+                            <tr>
+                                <td>@perm.User?.FullName</td>
+                                <td>@perm.User?.Email</td>
+                                <td>
+                                    @if (perm.PermissionType == "View") { <span>Chỉ xem</span>; }
+                                    else if (perm.PermissionType == "Edit") { <span>Chỉnh sửa</span>; }
+                                    else if (perm.PermissionType == "DownloadOnly") { <span>Chỉ tải về</span>; }
+                                    else { <span>@perm.PermissionType</span>; }
+                                </td>
+                                <td>
+                                    <form asp-action="RemovePermission" method="post" style="display:inline">
+                                        <input type="hidden" name="legalProfileId" value="@Model.Id" />
+                                        <input type="hidden" name="userId" value="@perm.UserId" />
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa quyền này?')">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <span class="text-muted">Chưa có người dùng nào được phân quyền</span>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        .timeline { list-style: none; padding-left: 0; }
+        .timeline li { margin-bottom: 1rem; }
+    </style>
+    <script>
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(function() {
+                    alert('Đã copy: ' + text);
+                }, function(err) {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+        function fallbackCopy(text) {
+            var temp = document.createElement('textarea');
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            alert('Đã copy: ' + text);
+        }
+    </script>
+} 
