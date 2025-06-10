@@ -1,0 +1,89 @@
+@using System.Text.Json
+@model prj1.Models.LegalProfile
+@{
+    ViewData["Title"] = "Lịch sử hoạt động";
+    var user = ViewBag.CurrentUser as prj1.Models.User;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-history"></i> Lịch sử hoạt động - Hồ sơ @Model.Name
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Thời gian</th>
+                                    <th>Người thực hiện</th>
+                                    <th>Hành động</th>
+                                    <th>Chi tiết</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var log in Model.AuditLogs.OrderByDescending(l => l.Timestamp))
+                                {
+                                    <tr>
+                                        <td>@log.Timestamp.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                        <td>@log.User.FullName</td>
+                                        <td>
+                                            @switch (log.Action)
+                                            {
+                                                case "View":
+                                                    <span class="badge bg-info">Xem</span>
+                                                    break;
+                                                case "Edit":
+                                                    <span class="badge bg-warning">Chỉnh sửa</span>
+                                                    break;
+                                                case "Verify":
+                                                    <span class="badge bg-success">Xác minh</span>
+                                                    break;
+                                                case "Download":
+                                                    <span class="badge bg-primary">Tải xuống</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-secondary">@log.Action</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>
+                                            @try
+                                            {
+                                                var changedFields = JsonSerializer.Deserialize<Dictionary<string, string>>(log.ChangedFields);
+                                                if (changedFields != null)
+                                                {
+                                                    <ul class="list-unstyled mb-0">
+                                                        @foreach (var field in changedFields)
+                                                        {
+                                                            <li>
+                                                                <strong>@field.Key:</strong> @field.Value
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                }
+                                            }
+                                            catch
+                                            {
+                                                <span class="text-muted">@log.ChangedFields</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

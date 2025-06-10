@@ -416,6 +416,28 @@ namespace prj1.Controllers
                 return Forbid();
             }
 
+            // Kiểm tra quyền Edit
+            ViewBag.CanEdit = legalProfile.UserId == user.Id || 
+                             user.Role == "Admin" ||
+                             legalProfile.Permissions.Any(p => p.UserId == user.Id && p.PermissionType == "Edit");
+
+            // Ghi log hành động xem
+            var auditLog = new AuditLog
+            {
+                LegalProfileId = legalProfile.Id,
+                UserId = user.Id,
+                UserName = user.FullName,
+                Action = "View",
+                ChangedFields = JsonSerializer.Serialize(new Dictionary<string, string>
+                {
+                    { "Action", "Xem hồ sơ" },
+                    { "ProfileName", legalProfile.Name }
+                }),
+                Timestamp = DateTime.Now
+            };
+            _context.AuditLogs.Add(auditLog);
+            await _context.SaveChangesAsync();
+
             return View(legalProfile);
         }
 
@@ -507,6 +529,113 @@ namespace prj1.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("Details", new { id = legalProfileId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AuditLog(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await GetCurrentUserAsync();
+            if (user == null)
+            {
+                return Challenge();
+            }
+
+            // Chỉ admin mới được xem audit log
+            if (user.Role != "Admin")
+            {
+                return Forbid();
+            }
+
+            var legalProfile = await _context.LegalProfiles
+                .Include(l => l.AuditLogs)
+                    .ThenInclude(al => al.User)
+                .FirstOrDefaultAsync(l => l.Id == id);
+
+            if (legalProfile == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.CurrentUser = user;
+            return View(legalProfile);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Download(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await GetCurrentUserAsync();
+            if (user == null)
+            {
+                return Challenge();
+            }
+
+            var legalProfile = await _context.LegalProfiles
+                .Include(l => l.Files)
+                .Include(l => l.Permissions)
+                .FirstOrDefaultAsync(l => l.Id == id);
+
+            if (legalProfile == null)
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra quyền truy cập: chủ sở hữu, admin hoặc có quyền trong Permissions
+            if (legalProfile.UserId != user.Id && user.Role != "Admin" &&
+                !legalProfile.Permissions.Any(p => p.UserId == user.Id))
+            {
+                return Forbid();
+            }
+
+            // Lấy file đầu tiên để tải xuống
+            var file = legalProfile.Files.FirstOrDefault();
+            if (file == null)
+            {
+                return NotFound("Không tìm thấy file đính kèm");
+            }
+
+            var filePath = Path.Combine(_environment.WebRootPath, file.FilePath);
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound("File không tồn tại trên server");
+            }
+
+            // Ghi log hành động tải xuống
+            var auditLog = new AuditLog
+            {
+                LegalProfileId = legalProfile.Id,
+                UserId = user.Id,
+                UserName = user.FullName,
+                Action = "Download",
+                ChangedFields = JsonSerializer.Serialize(new Dictionary<string, string>
+                {
+                    { "FileName", file.FileName },
+                    { "FileSize", file.FileSize.ToString() },
+                    { "ContentType", file.ContentType }
+                }),
+                Timestamp = DateTime.Now
+            };
+            _context.AuditLogs.Add(auditLog);
+            await _context.SaveChangesAsync();
+
+            // Trả về file để tải xuống
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(filePath, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+
+            return File(memory, file.ContentType, file.FileName);
         }
 
         private bool LegalProfileExists(int id)
