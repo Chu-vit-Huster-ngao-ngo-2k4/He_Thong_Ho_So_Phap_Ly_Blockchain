@@ -1,0 +1,39 @@
+@model prj1.Models.DocumentTemplate
+@{
+    ViewData["Title"] = "Chỉnh sửa mẫu báo cáo";
+}
+<div class="container py-4">
+    <h2 class="mb-4">Chỉnh sửa mẫu báo cáo</h2>
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Category" class="form-label"></label>
+            <input asp-for="Category" class="form-control" />
+            <span asp-validation-for="Category" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">File mẫu (nếu muốn thay thế)</label>
+            <input type="file" name="file" class="form-control" />
+            <div class="form-text">Để trống nếu không muốn thay đổi file.</div>
+        </div>
+        @if (Model.FileName != null)
+        {
+            <div class="mb-3">
+                <span>File hiện tại: <b>@Model.FileName</b></span>
+                <a asp-action="Download" asp-route-id="@Model.Id" class="btn btn-link btn-sm"><i class="fas fa-download"></i> Tải về</a>
+            </div>
+        }
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </form>
+</div> 

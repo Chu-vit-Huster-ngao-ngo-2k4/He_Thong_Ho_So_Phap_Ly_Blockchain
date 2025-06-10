@@ -1,0 +1,51 @@
+@model IEnumerable<prj1.Models.DocumentTemplate>
+@{
+    ViewData["Title"] = "Mẫu báo cáo & hợp đồng";
+    var currentUser = ViewBag.CurrentUser as prj1.Models.User;
+}
+
+<div class="container py-4">
+    <h2 class="mb-4">Danh sách mẫu báo cáo & hợp đồng</h2>
+    @if (currentUser != null && currentUser.Role == "Admin")
+    {
+        <a asp-action="Create" class="btn btn-success mb-3"><i class="fas fa-plus"></i> Tạo mẫu mới</a>
+    }
+    <table class="table table-bordered table-hover bg-white">
+        <thead class="table-light">
+            <tr>
+                <th>Tên mẫu</th>
+                <th>Mô tả</th>
+                <th>Loại</th>
+                <th>Kích thước</th>
+                <th>Ngày tạo</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Description</td>
+                <td>@item.Category</td>
+                <td>@(item.FileSize / 1024) KB</td>
+                <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+                <td>
+                    <a asp-action="Download" asp-route-id="@item.Id" class="btn btn-primary btn-sm">
+                        <i class="fas fa-download"></i> Tải về
+                    </a>
+                    @if (currentUser != null && currentUser.Role == "Admin")
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm ms-1">
+                            <i class="fas fa-edit"></i> Sửa
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline ms-1" onsubmit="return confirm('Bạn chắc chắn muốn xóa mẫu này?');">
+                            <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Xóa</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div> 

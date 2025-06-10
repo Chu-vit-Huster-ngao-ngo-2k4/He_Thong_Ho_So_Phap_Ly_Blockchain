@@ -15,6 +15,7 @@ namespace prj1.Data
         public DbSet<LegalProfileFile> LegalProfileFiles { get; set; }
         public DbSet<LegalProfilePermission> LegalProfilePermissions { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<DocumentTemplate> DocumentTemplates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

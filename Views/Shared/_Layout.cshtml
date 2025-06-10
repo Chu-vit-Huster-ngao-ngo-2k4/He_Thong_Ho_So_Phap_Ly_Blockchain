@@ -62,6 +62,7 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                  
                         @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
@@ -75,6 +76,12 @@
                                 </a>
                             </li>
                         }
+
+                              <li class="nav-item">
+                            <a class="nav-link" asp-controller="DocumentTemplate" asp-action="Index">
+                                <i class="fas fa-file-alt"></i> Mẫu báo cáo
+                            </a>
+                        </li>
                     </ul>
                     <ul class="navbar-nav align-items-center">
                         @if (User.Identity.IsAuthenticated)
