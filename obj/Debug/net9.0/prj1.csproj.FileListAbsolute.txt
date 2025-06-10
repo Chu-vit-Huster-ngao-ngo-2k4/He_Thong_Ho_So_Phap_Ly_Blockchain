@@ -227,3 +227,4 @@ C:\Desktop\C#\prj1\bin\Debug\net9.0\MySqlConnector.dll
 C:\Desktop\C#\prj1\bin\Debug\net9.0\Pomelo.EntityFrameworkCore.MySql.dll
 C:\Desktop\C#\prj1\obj\Debug\net9.0\compressed\i6de7sgv1n-u5pbf19y4v.gz
 C:\Desktop\C#\prj1\obj\Debug\net9.0\compressed\vkg2jv5mvx-mtrdyao7ia.gz
+C:\Desktop\C#\prj1\obj\Debug\net9.0\prj1.sourcelink.json
